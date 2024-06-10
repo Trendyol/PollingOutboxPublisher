@@ -148,3 +148,5 @@ set:
 | `Redis.Password`                             | string   | The password for the Redis instance.                                                                                                                               |
 | `Serilog`                                    | object   | The configuration for Serilog.                                                                                                                                     |
 
+### LICENSE
+Released under the [MIT License](https://github.com/Trendyol/PollingOutboxPublisher/blob/master/LICENSE).

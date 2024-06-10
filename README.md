@@ -98,8 +98,6 @@ value).
 > If there will be multiple instances, the `MasterPodSettings.IsActive` should be set to `true`. Otherwise, messages can
 > be duplicated or not published.
 
-### asd
-
 ### Configuration
 
 The application can be configured using the `config.json` and `secret.json` files. Here are the configurations you can

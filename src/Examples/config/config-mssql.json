@@ -1,0 +1,9 @@
+{
+  "DataStoreSettings": {
+    "DatabaseType": "MSSQL",
+    "OutboxEvents": "Outbox.OutboxEvents",
+    "MissingEvents": "Outbox.MissingOutboxEvents",
+    "ExceededEvents": "Outbox.ExceededOutboxEvents",
+    "OutboxOffset": "Outbox.OutboxOffsets"
+  }
+}

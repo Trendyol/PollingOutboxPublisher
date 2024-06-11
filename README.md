@@ -14,7 +14,7 @@
 
 ## Description
 
-- Message Publisher is outbox implementation for distributed systems. It uses an outbox algorithm and async transactions
+- Polling Outbox Publisher is an outbox implementation for distributed systems. It uses an outbox algorithm and async transactions
   to ensure that no events are lost during processing.
 - This application uses a straightforward approach where it periodically checks for new messages and publishes them in
   groups to the Kafka cluster. It deliberately avoids more complex data transfer technologies like Debezium Change Data
@@ -89,8 +89,8 @@ value).
 2. The rest of the instances will be **Follower Pods** and will try to take the `MasterPodLock` every certain amount of
    time.
 3. Also, the **Master Pod** will try to extend the `MasterPodLock` every certain amount of time.
-4. If the **Master Pod** fails, the one of the **Follower Pods** will take the `MasterPodLock` and become the new *
-   *Master Pod**.
+4. If the **Master Pod** fails, the one of the **Follower Pods** will take the `MasterPodLock` and become the new
+   **Master Pod**.
 5. This feature can be disabled by setting the `MasterPodSettings.IsActive` to `false`, **but don't forget to make sure
    that only one instance is running at a time.**
 

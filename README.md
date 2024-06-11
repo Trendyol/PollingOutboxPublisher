@@ -98,7 +98,7 @@ value).
 > If there will be multiple instances, the `MasterPodSettings.IsActive` should be set to `true`. Otherwise, messages can
 > be duplicated or not published.
 
-### Configuration
+## Configuration
 
 The application can be configured using the `config.json` and `secret.json` files. Here are the configurations you can
 set:
@@ -148,5 +148,5 @@ set:
 | `Redis.Password`                             | string   | The password for the Redis instance.                                                                                                                               |
 | `Serilog`                                    | object   | The configuration for Serilog.                                                                                                                                     |
 
-### LICENSE
+## LICENSE
 Released under the [MIT License](https://github.com/Trendyol/PollingOutboxPublisher/blob/master/LICENSE).

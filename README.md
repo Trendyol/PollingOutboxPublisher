@@ -40,7 +40,7 @@ git clone https://gitlab.trendyol.com/fulfillment/b2b/tools/message-publisher.gi
 ```
 
 2. Open the project in a IDE of your choice
-3. Update the values in the `confis.json` and the `secret.json` file.
+3. Update the values in the `config.json` and the `secret.json` file.
 4. Run the project
 5. Set as `0` the first row in the `OutboxOffset`.
 6. The project will start the publish messages in the `OutboxEvents` data store.

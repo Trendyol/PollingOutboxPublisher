@@ -10,7 +10,10 @@
     - [Algorithm](#algorithm)
     - [Multiple Instances](#multiple-instances)
 - [Configuration](#configuration)
-- [Building](#building)
+- [Example](#example)
+- [License](#license)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
 
 ## Description
 

@@ -39,7 +39,7 @@
 1. Clone the repository
 
 ```bash
-git clone https://gitlab.trendyol.com/fulfillment/b2b/tools/message-publisher.git
+git clone https://github.com/Trendyol/PollingOutboxPublisher.git
 ```
 
 2. Open the project in a IDE of your choice

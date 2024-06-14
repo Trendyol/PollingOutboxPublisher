@@ -152,7 +152,8 @@ set:
 | `Serilog`                                    | object   | The configuration for Serilog.                                                                                                                                     |
 
 ## EXAMPLE
-Under the Example folder, you can find the example DataStoreSettings configurations for the `config.json` for each database type.
+In the [Examples](https://github.com/Trendyol/PollingOutboxPublisher/tree/master/src/Examples) folder, you'll find example files for config.json, secret.json, and implementation on how to insert messages for each database type
+
 > [!WARNING]
 > For the Couchbase, incremental ID is used for the `OutboxEvents` data store. If you want to use the Couchbase, you should use a Counter for the ID. You can find the example code in the `CouchbaseExample` class.
 

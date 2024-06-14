@@ -42,10 +42,10 @@
 git clone https://github.com/Trendyol/PollingOutboxPublisher.git
 ```
 
-2. Open the project in a IDE of your choice
-3. Update the values in the `config.json` and the `secret.json` file.
-4. Run the project
+2. Open the project in a IDE of your choice.
+3. Add the config file (`/config/config.json`) and secret file (`/config/secret.json`).
 5. Set as `0` the first row in the `OutboxOffset`.
+4. Run the project.
 6. The project will start the publish messages in the `OutboxEvents` data store.
 7. That's it! You're ready to go!
 

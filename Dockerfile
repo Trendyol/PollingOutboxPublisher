@@ -17,9 +17,6 @@ RUN rm -f ./src/config/secret.json
 
 RUN dotnet publish ./src/PollingOutboxPublisher.csproj -c Release -o /publish
 
-# Print the directory contents
-RUN ls -la /publish
-
 # Runtime Stage
 FROM mcr.microsoft.com/dotnet/runtime:8.0
 

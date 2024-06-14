@@ -34,7 +34,7 @@ public static class Program
         CheckConfigFileExistence();
         var host = CreateHostBuilder(args).Build();
 
-        //ExampleRunner.RunMsSqlExample(host);
+        //ExampleRunner.RunPostgresExample(host);
         
         await host.RunAsync();
     }

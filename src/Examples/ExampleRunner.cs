@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
+using PollingOutboxPublisher.Examples.Couchbase;
+using PollingOutboxPublisher.Examples.MsSql;
+using PollingOutboxPublisher.Examples.Postgres;
 
 namespace PollingOutboxPublisher.Examples;
 

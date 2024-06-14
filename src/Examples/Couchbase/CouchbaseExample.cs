@@ -3,7 +3,7 @@ using Couchbase.KeyValue;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Models;
 
-namespace PollingOutboxPublisher.Examples;
+namespace PollingOutboxPublisher.Examples.Couchbase;
 
 public class CouchbaseExample(ICouchbaseScopeProvider couchbaseScopeProvide)
 {

@@ -1,9 +1,0 @@
-{
-  "DataStoreSettings": {
-    "DatabaseType": "PostgreSQL",
-    "OutboxEvents": "outbox.outbox_events",
-    "MissingEvents": "outbox.missing_outbox_events",
-    "ExceededEvents": "outbox.exceeded_outbox_events",
-    "OutboxOffset": "outbox.outbox_offsets"
-  }
-}

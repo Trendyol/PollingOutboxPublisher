@@ -4,7 +4,7 @@ using Dapper;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Models;
 
-namespace PollingOutboxPublisher.Examples;
+namespace PollingOutboxPublisher.Examples.MsSql;
 
 public class MsSqlExample(IMsSqlConnectionProvider msSqlConnectionProvider)
 {

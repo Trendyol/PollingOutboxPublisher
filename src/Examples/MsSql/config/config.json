@@ -1,0 +1,58 @@
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console"
+    ],
+    "MinimumLevel": "Debug",
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}, {Level:u3}, {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName",
+      "WithThreadId"
+    ]
+  },
+  "Kafka": {
+    "SaslUsername": "",
+    "Brokers": "",
+    "SslCaLocation": "",
+    "ClientId": ""
+  },
+  "BenchMarkOptions": {
+    "IsPublishingOn": true
+  },
+  "WorkerSettings": {
+    "OutboxEventsBatchSize": 5000,
+    "MissingEventsBatchSize": 500,
+    "MissingEventsWaitDuration": 20000,
+    "MissingEventsMaxRetryCount": 5,
+    "QueueWaitDuration": 100,
+    "BrokerErrorsMaxRetryCount": 5,
+    "RedeliveryDelayAfterError": 250
+  },
+  "DataStoreSettings": {
+    "DatabaseType": "MSSQL",
+    "OutboxEvents": "Outbox.OutboxEvents",
+    "MissingEvents": "Outbox.MissingOutboxEvents",
+    "ExceededEvents": "Outbox.ExceededOutboxEvents",
+    "OutboxOffset": "Outbox.OutboxOffsets"
+  },
+  "MasterPodSettings": {
+    "IsActive": true,
+    "CacheName": "PollingOutboxPublisher.MSSQL",
+    "MasterPodLifetime": 60000,
+    "MasterPodRaceInterval": 30000,
+    "IsMasterPodCheckInterval": 100
+  },
+  "Redis": {
+    "Endpoints": "",
+    "DefaultDatabase": 1,
+    "Config": ""
+  }
+}

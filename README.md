@@ -153,8 +153,14 @@ Under the Example folder, you can find the example DataStoreSettings configurati
 > [!WARNING]
 > For the Couchbase, incremental ID is used for the `OutboxEvents` data store. If you want to use the Couchbase, you should use a Counter for the ID. You can find the example code in the `CouchbaseExample` class.
 
+## LICENSE
+Released under the [MIT License](https://github.com/Trendyol/PollingOutboxPublisher/blob/master/LICENSE).
+
 ## CONTRIBUTING
 See the [CONTRIBUTING](./CONTRIBUTING.md) file for details.
 
-## LICENSE
-Released under the [MIT License](https://github.com/Trendyol/PollingOutboxPublisher/blob/master/LICENSE).
+## CONTRIBUTORS
+
+<a href="https://github.com/Trendyol/PollingOutboxPublisher/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Trendyol/PollingOutboxPublisher" />
+</a>

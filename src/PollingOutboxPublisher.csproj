@@ -36,8 +36,6 @@
         <None Update="config\config.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Remove="Examples\MsSql\**" />
-        <None Remove="Examples\Postgres\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,8 +43,6 @@
         <EmbeddedResource Include="Certificates\truststore.jks">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
-        <EmbeddedResource Remove="Examples\MsSql\**" />
-        <EmbeddedResource Remove="Examples\Postgres\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -54,11 +50,6 @@
         <EmbeddedResource Include="Certificates\newroot.pem">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Examples\MsSql\**" />
-      <Compile Remove="Examples\Postgres\**" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ using StackExchange.Redis;
 
 namespace PollingOutboxPublisher.Redis;
 
+[ExcludeFromCodeCoverage]
 public class RedisLockManager : IRedisLockManager
 {
     private readonly ILogger<RedisLockManager> _logger;

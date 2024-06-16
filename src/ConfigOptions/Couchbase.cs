@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PollingOutboxPublisher.ConfigOptions;
 
+[ExcludeFromCodeCoverage]
 public class Couchbase
 {
     public string Bucket { get; set; }

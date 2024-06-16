@@ -1,11 +1,13 @@
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Exceptions;
 
 namespace PollingOutboxPublisher.Database.Providers;
 
+[ExcludeFromCodeCoverage]
 public class MsSqlConnectionProvider : IMsSqlConnectionProvider
 {
     private readonly string _connectionString;

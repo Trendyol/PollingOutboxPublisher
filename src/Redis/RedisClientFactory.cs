@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PollingOutboxPublisher.Exceptions;
@@ -7,6 +8,7 @@ using StackExchange.Redis;
 
 namespace PollingOutboxPublisher.Redis;
 
+[ExcludeFromCodeCoverage]
 public class RedisClientFactory : IRedisClientFactory
 {
     private readonly ILogger<RedisClientFactory> _logger;

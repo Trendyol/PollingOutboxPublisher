@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PollingOutboxPublisher.ConfigOptions;
 
+[ExcludeFromCodeCoverage]
 public class Redis
 {
     public string Endpoints { get; set; }

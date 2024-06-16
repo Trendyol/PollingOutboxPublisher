@@ -1,4 +1,5 @@
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
@@ -6,6 +7,7 @@ using PollingOutboxPublisher.Exceptions;
 
 namespace PollingOutboxPublisher.Database.Providers;
 
+[ExcludeFromCodeCoverage]
 public class PostgresConnectionProvider : IPostgresConnectionProvider
 {
     private readonly string _connectionString;

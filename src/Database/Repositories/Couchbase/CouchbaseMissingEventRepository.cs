@@ -85,9 +85,17 @@ public class CouchbaseMissingEventRepository : IMissingEventRepository
 
         await Task.WhenAll(tasks);
 
-        foreach (var task in tasks.Where(task => task.Result.MetaData!.Status != QueryStatus.Success))
+        ThrowExceptionsForFailedQueries(tasks);
+    }
+
+    private static void ThrowExceptionsForFailedQueries(List<Task<IQueryResult<dynamic>>> tasks)
+    {
+        var failedTasks = tasks.Where(task => task.Result.MetaData!.Status != QueryStatus.Success).ToList();
+        if (failedTasks.Count > 0)
         {
-            throw new CouchbaseQueryFailedException(task.Result.Errors.ToString());
+            var errors = failedTasks.Select(task => task.Result.Errors.ToString()).ToList();
+            var joinedErrors = string.Join(" | ", errors);
+            throw new CouchbaseQueryFailedException(joinedErrors);
         }
     }
 

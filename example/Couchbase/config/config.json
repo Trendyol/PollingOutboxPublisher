@@ -37,8 +37,10 @@
     "RedeliveryDelayAfterError": 250
   },
   "Couchbase": {
-    "Bucket": "bucket-name",
-    "Scope": "scope-name"
+    "Host": "",
+    "Username": "",
+    "Bucket": "",
+    "Scope": ""
   },
   "DataStoreSettings": {
     "DatabaseType": "Couchbase",

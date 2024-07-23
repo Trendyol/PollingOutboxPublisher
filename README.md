@@ -89,12 +89,13 @@ one instance should be the **Master Pod** at a time.
 value).
 
 1. The first instance that take the `MasterPodLock` will be the **Master Pod** and will start publishing messages.
-2. The rest of the instances will be **Follower Pods** and will try to take the `MasterPodLock` every certain amount of
+   * `MasterPodLock` is a simple redis key. If lock taken, the value of the key is setted as pod name which is getting from Environment value. If Environment doesn't have pod name, GUID is used.
+3. The rest of the instances will be **Follower Pods** and will try to take the `MasterPodLock` every certain amount of
    time.
-3. Also, the **Master Pod** will try to extend the `MasterPodLock` every certain amount of time.
-4. If the **Master Pod** fails, the one of the **Follower Pods** will take the `MasterPodLock` and become the new
+4. Also, the **Master Pod** will try to extend the `MasterPodLock` every certain amount of time.
+5. If the **Master Pod** fails, the one of the **Follower Pods** will take the `MasterPodLock` and become the new
    **Master Pod**.
-5. This feature can be disabled by setting the `MasterPodSettings.IsActive` to `false`, **but don't forget to make sure
+6. This feature can be disabled by setting the `MasterPodSettings.IsActive` to `false`, **but don't forget to make sure
    that only one instance is running at a time.**
 
 > [!WARNING]
@@ -141,7 +142,7 @@ set:
 | `DataStoreSettings.ExceededEvents`           | string   | The name of the exceeded event data store.                                                                                                                         |
 | `DataStoreSettings.OutboxOffset`             | string   | The name of the outbox offset data store. Holds the last published `OutboxEvents` Id                                                                               |
 | `MasterPodSettings.IsActive`                 | bool     | A flag indicating whether the master pod checker is active. Should be active if multiple pods is using.                                                            |
-| `MasterPodSettings.CacheName`                | string   | The name of the distributed lock key.                                                                                                                              |
+| `MasterPodSettings.CacheName`                | string   | The name of the distributed lock key. This key should be same for the multiple instances of the app.                                                                                                                              |
 | `MasterPodSettings.MasterPodLifetime`        | int      | The lifetime of the master pod. The TTL of the distributed lock.                                                                                                   |
 | `MasterPodSettings.MasterPodRaceInterval`    | int      | The interval to take `MasterPodLock` for **MasterPod** and **FollowerPods**.                                                                                       |
 | `MasterPodSettings.IsMasterPodCheckInterval` | int      | The check interval for the `FollowerPods`. The check without intervals causes high CPU usage; because of that, this is needed.                                     |

@@ -62,6 +62,7 @@ git clone https://github.com/Trendyol/PollingOutboxPublisher.git
     3. `ExceededEvents`: The data store that holds the messages that could not be published after the retry limit is
        reached.
     4. `OutboxOffset`: The data store that holds the last published `OutboxEvents` ID.
+- The scritps for creating data stores can be found under examples](https://github.com/Trendyol/PollingOutboxPublisher/tree/master/examples) folder
 
 ### Algorithm
 

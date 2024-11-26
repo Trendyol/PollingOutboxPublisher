@@ -30,8 +30,8 @@ public sealed class KafkaProducer : IKafkaProducer
             SaslPassword = kafka.SaslPassword,
             SslCaLocation = kafka.SslCaLocation,
             SslKeystorePassword = kafka.SslKeystorePassword,
-            SaslMechanism = kafka.SaslMechanism ?? SaslMechanism.ScramSha512,
-            SecurityProtocol = kafka.SecurityProtocol ?? SecurityProtocol.SaslSsl,
+            SaslMechanism = kafka.SaslMechanism,
+            SecurityProtocol = kafka.SecurityProtocol,
             BatchSize = kafka.BatchSize ?? 512 * 1024,  // 30000000
             LingerMs = kafka.LingerMs ?? 10,
             CompressionType = kafka.CompressionType ?? CompressionType.Snappy,

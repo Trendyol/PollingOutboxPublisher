@@ -22,7 +22,9 @@
     "SaslUsername": "",
     "Brokers": "",
     "SslCaLocation": "",
-    "ClientId": ""
+    "ClientId": "",
+    "SaslMechanism": "",
+    "SecurityProtocol": ""
   },
   "BenchMarkOptions": {
     "IsPublishingOn": true

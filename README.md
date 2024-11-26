@@ -17,7 +17,8 @@
 
 ## Description
 
-- Polling Outbox Publisher is an outbox implementation for distributed systems. It uses an outbox algorithm and async transactions
+- Polling Outbox Publisher is an outbox implementation for distributed systems. It uses an outbox algorithm and async
+  transactions
   to ensure that no events are lost during processing.
 - This application uses a straightforward approach where it periodically checks for new messages and publishes them in
   groups to the Kafka cluster. It deliberately avoids more complex data transfer technologies like Debezium Change Data
@@ -62,7 +63,8 @@ git clone https://github.com/Trendyol/PollingOutboxPublisher.git
     3. `ExceededEvents`: The data store that holds the messages that could not be published after the retry limit is
        reached.
     4. `OutboxOffset`: The data store that holds the last published `OutboxEvents` ID.
-- The scritps for creating data stores can be found under examples](https://github.com/Trendyol/PollingOutboxPublisher/tree/master/examples) folder
+- The scritps for creating data stores can be found under
+  examples](https://github.com/Trendyol/PollingOutboxPublisher/tree/master/examples) folder
 
 ### Algorithm
 
@@ -90,7 +92,8 @@ one instance should be the **Master Pod** at a time.
 value).
 
 1. The first instance that take the `MasterPodLock` will be the **Master Pod** and will start publishing messages.
-   * `MasterPodLock` is a simple redis key. If lock taken, the value of the key is setted as pod name which is getting from Environment value. If Environment doesn't have pod name, GUID is used.
+    * `MasterPodLock` is a simple redis key. If lock taken, the value of the key is setted as pod name which is getting
+      from Environment value. If Environment doesn't have pod name, GUID is used.
 3. The rest of the instances will be **Follower Pods** and will try to take the `MasterPodLock` every certain amount of
    time.
 4. Also, the **Master Pod** will try to extend the `MasterPodLock` every certain amount of time.
@@ -108,6 +111,12 @@ value).
 The application can be configured using the `config.json` and `secret.json` files. Here are the configurations you can
 set:
 
+## Important Notes
+
+> [!WARNING]
+> The default values for `Kafka.SaslMechanism` and `Kafka.SecurityProtocol` have been removed in version 1.3.0. Please
+> ensure to set these values in your configuration to avoid any issues.
+
 | **Key**                                      | **Type** | **Description**                                                                                                                                                    |
 |----------------------------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Kafka.SaslUsername`                         | string   | The username for the SASL authentication of the Kafka cluster.                                                                                                     |
@@ -115,8 +124,8 @@ set:
 | `Kafka.SaslPassword`                         | string   | The password for the SASL authentication of the Kafka cluster.                                                                                                     |
 | `Kafka.SslCaLocation`                        | string   | The location of the SSL certificate for the Kafka cluster.                                                                                                         |
 | `Kafka.SslKeystorePassword`                  | string   | The SSL Keystore Password                                                                                                                                          |
-| `Kafka.SaslMechanism`                        | string   | The SSL Mechanism. **Default: ScramSha512**                                                                                                                        |
-| `Kafka.SecurityProtocol`                     | string   | The SSL Protocol. **Default: SaslSsl**                                                                                                                             |
+| `Kafka.SaslMechanism`                        | string   | The SSL Mechanism.                                                                                                                                                 |
+| `Kafka.SecurityProtocol`                     | string   | The SSL Protocol.                                                                                                                                                  |
 | `Kafka.BatchSize`                            | string   | The Batch Size of the Kafka Publisher. **Default: 512 * 1024**                                                                                                     |
 | `Kafka.LingerMs`                             | string   | The Linger of the Kafka Publisher. **Default: 10**                                                                                                                 |
 | `Kafka.CompressionType`                      | string   | The Compression Type of the Kafka Publisher. **Default: Snappy**                                                                                                   |
@@ -143,7 +152,7 @@ set:
 | `DataStoreSettings.ExceededEvents`           | string   | The name of the exceeded event data store.                                                                                                                         |
 | `DataStoreSettings.OutboxOffset`             | string   | The name of the outbox offset data store. Holds the last published `OutboxEvents` Id                                                                               |
 | `MasterPodSettings.IsActive`                 | bool     | A flag indicating whether the master pod checker is active. Should be active if multiple pods is using.                                                            |
-| `MasterPodSettings.CacheName`                | string   | The name of the distributed lock key. This key should be same for the multiple instances of the app.                                                                                                                              |
+| `MasterPodSettings.CacheName`                | string   | The name of the distributed lock key. This key should be same for the multiple instances of the app.                                                               |
 | `MasterPodSettings.MasterPodLifetime`        | int      | The lifetime of the master pod. The TTL of the distributed lock.                                                                                                   |
 | `MasterPodSettings.MasterPodRaceInterval`    | int      | The interval to take `MasterPodLock` for **MasterPod** and **FollowerPods**.                                                                                       |
 | `MasterPodSettings.IsMasterPodCheckInterval` | int      | The check interval for the `FollowerPods`. The check without intervals causes high CPU usage; because of that, this is needed.                                     |
@@ -154,15 +163,20 @@ set:
 | `Serilog`                                    | object   | The configuration for Serilog.                                                                                                                                     |
 
 ## EXAMPLE
-In the [examples](https://github.com/Trendyol/PollingOutboxPublisher/tree/master/examples) folder, you'll find example files for `config.json`, `secret.json`, and implementation on how to insert messages for each database type
+
+In the [examples](https://github.com/Trendyol/PollingOutboxPublisher/tree/master/examples) folder, you'll find example
+files for `config.json`, `secret.json`, and implementation on how to insert messages for each database type
 
 > [!WARNING]
-> For the Couchbase, incremental ID is used for the `OutboxEvents` data store. If you want to use the Couchbase, you should use a Counter for the ID. You can find the example code in the `CouchbaseExample` class.
+> For the Couchbase, incremental ID is used for the `OutboxEvents` data store. If you want to use the Couchbase, you
+> should use a Counter for the ID. You can find the example code in the `CouchbaseExample` class.
 
 ## LICENSE
+
 Released under the [MIT License](https://github.com/Trendyol/PollingOutboxPublisher/blob/master/LICENSE).
 
 ## CONTRIBUTING
+
 See the [CONTRIBUTING](./CONTRIBUTING.md) file for details.
 
 ## CONTRIBUTORS

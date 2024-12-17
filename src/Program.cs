@@ -31,33 +31,20 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        CheckConfigFileExistence();
         var host = CreateHostBuilder(args).Build();
-
         //ExampleRunner.RunPostgresExample(host);
-        
         await host.RunAsync();
     }
-
-    private static void CheckConfigFileExistence()
-    {
-        var isConfigExist = File.Exists(Directory.GetCurrentDirectory() + "/config/config.json");
-        if (!isConfigExist)
-            throw new FileNotFoundException("File not found", "config.json");
-
-        var isSecretExist = File.Exists(Directory.GetCurrentDirectory() + "/config/secret.json");
-        if (!isSecretExist)
-            throw new FileNotFoundException("File not found", "secret.json");
-    }
-
+    
     private static IHostBuilder CreateHostBuilder(string[] args)
     {
         return Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration(
                 (_, builder) =>
                 {
-                    builder.AddJsonFile("config/config.json", true, true)
-                        .AddJsonFile("config/secret.json", true, true)
+                    builder
+                        .AddJsonFile("config/config.json", false, true)
+                        .AddJsonFile("config/secret.json", false, true)
                         .Build();
                 })
             .ConfigureServices((hostContext, services) =>

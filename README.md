@@ -119,6 +119,7 @@ set:
 
 | **Key**                                      | **Type** | **Description**                                                                                                                                                    |
 |----------------------------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Kafka.ReloadOnChange`                         | bool     | The flag indicating whether the Kafka configuration should be reloaded when the configuration file changes.                                                        |
 | `Kafka.SaslUsername`                         | string   | The username for the SASL authentication of the Kafka cluster.                                                                                                     |
 | `Kafka.Brokers`                              | string   | The addresses of the Kafka brokers.                                                                                                                                |
 | `Kafka.SaslPassword`                         | string   | The password for the SASL authentication of the Kafka cluster.                                                                                                     |

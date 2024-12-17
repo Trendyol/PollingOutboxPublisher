@@ -1,3 +1,8 @@
+## v1.4.0 (December 17, 2024)
+
+### Added:
+- `ReloadOnChange` flag to Kafka configuration. This allows you to change the configuration without restarting the application.
+
 ## v1.3.0 (October 26, 2024)
 
 ### Changed:

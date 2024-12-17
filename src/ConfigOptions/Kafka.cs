@@ -19,4 +19,5 @@ public class Kafka
     public Acks? Acks { get; set; }
     public double? LingerMs { get; set; }
     public string ClientId { get; set; }
+    public bool ReloadOnChange { get; set; }
 }

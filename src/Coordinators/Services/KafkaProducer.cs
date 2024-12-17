@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
@@ -13,13 +14,26 @@ namespace PollingOutboxPublisher.Coordinators.Services;
 public sealed class KafkaProducer : IKafkaProducer
 {
     private IProducer<string, string> _producer;
+    private Kafka _kafkaConfiguration;
+    private readonly ILogger<KafkaProducer> _logger;
 
-    public KafkaProducer(IOptions<Kafka> kafkaOptions)
+    public KafkaProducer(IOptionsMonitor<Kafka> kafkaOptionsMonitor, ILogger<KafkaProducer> logger)
     {
-        var kafkaConfiguration = kafkaOptions.Value;
-        BuildProducer(kafkaConfiguration);
+        _logger = logger;
+        _kafkaConfiguration = kafkaOptionsMonitor.CurrentValue;
+        kafkaOptionsMonitor.OnChange(OnKafkaConfigChanged);
+        BuildProducer(_kafkaConfiguration);
     }
 
+    private void OnKafkaConfigChanged(Kafka newKafkaConfig)
+    {
+        if (!newKafkaConfig.ReloadOnChange) return;
+        
+        _logger.LogInformation("Kafka configuration changed");
+        _kafkaConfiguration = newKafkaConfig;
+        BuildProducer(_kafkaConfiguration);
+    }
+    
     private void BuildProducer(Kafka kafka)
     {
         var config = new ProducerConfig
@@ -38,6 +52,12 @@ public sealed class KafkaProducer : IKafkaProducer
             MessageMaxBytes = kafka.MessageMaxBytes ?? 30000000,
             Acks = kafka.Acks ?? Acks.Leader
         };
+        
+        if (_producer != null)
+        {
+            _producer.Flush(TimeSpan.FromSeconds(10));
+            _producer.Dispose();
+        }
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
 

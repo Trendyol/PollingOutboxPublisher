@@ -97,6 +97,8 @@ public static class Program
             hostContext.Configuration.GetSection(nameof(ConfigOptions.Couchbase)));
         services.Configure<ConfigOptions.Redis>(
             hostContext.Configuration.GetSection(nameof(ConfigOptions.Redis)));
+        services.Configure<CircuitBreakerSettings>(
+            hostContext.Configuration.GetSection(nameof(CircuitBreakerSettings)));
     }
 
     private static void RegisterSerilog(IServiceCollection services)

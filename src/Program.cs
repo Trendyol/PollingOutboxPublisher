@@ -35,7 +35,7 @@ public static class Program
         //ExampleRunner.RunPostgresExample(host);
         await host.RunAsync();
     }
-    
+
     private static IHostBuilder CreateHostBuilder(string[] args)
     {
         return Host.CreateDefaultBuilder(args)
@@ -67,6 +67,10 @@ public static class Program
         services.AddTransient<IOffsetSetter, OffsetSetter>();
         services.AddTransient<IMissingDetector, MissingDetector>();
         services.AddTransient<IMissingEventCleaner, MissingEventCleaner>();
+
+        // Register separate circuit breakers for each daemon
+        services.AddKeyedSingleton<ICircuitBreaker, CircuitBreaker>("MissingEventsCircuitBreaker");
+        services.AddKeyedSingleton<ICircuitBreaker, CircuitBreaker>("OutboxEventsCircuitBreaker");
     }
 
     private static void RegisterKafkaServices(IServiceCollection services)
@@ -110,7 +114,8 @@ public static class Program
         });
     }
 
-    private static void RegisterSelectedDatabaseRepositories(HostBuilderContext hostContext, IServiceCollection services)
+    private static void RegisterSelectedDatabaseRepositories(HostBuilderContext hostContext,
+        IServiceCollection services)
     {
         var databaseType = hostContext.Configuration.GetValue<string>("DataStoreSettings:DatabaseType");
 

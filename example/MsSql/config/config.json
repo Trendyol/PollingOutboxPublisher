@@ -41,10 +41,10 @@
   },
   "DataStoreSettings": {
     "DatabaseType": "MSSQL",
-    "OutboxEvents": "Outbox.OutboxEvents",
-    "MissingEvents": "Outbox.MissingOutboxEvents",
-    "ExceededEvents": "Outbox.ExceededOutboxEvents",
-    "OutboxOffset": "Outbox.OutboxOffsets"
+    "OutboxEvents": "outbox.outbox_events",
+    "MissingEvents": "outbox.missing_outbox_events",
+    "ExceededEvents": "outbox.exceeded_outbox_events",
+    "OutboxOffset": "outbox.outbox_offsets"
   },
   "MasterPodSettings": {
     "IsActive": true,
@@ -57,5 +57,11 @@
     "Endpoints": "",
     "DefaultDatabase": 1,
     "Config": ""
+  },
+  "CircuitBreakerSettings": {
+    "IsEnabled": true,
+    "Threshold": 3,
+    "DurationMs": 30000,
+    "HalfOpenMaxAttempts": 1
   }
 }

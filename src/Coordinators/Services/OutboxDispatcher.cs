@@ -44,8 +44,8 @@ public class OutboxDispatcher : IOutboxDispatcher
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Message broker is unavailable. Exception: {Exception}", ex.Message);
-            await HandleExceptionSafe(() => HandleGenericException(outboxEvent));
+            await LogErrorAndHandle(ex, "Message broker is unavailable",
+                () =>  HandleGenericException(outboxEvent));
         }
     }
 
@@ -60,18 +60,18 @@ public class OutboxDispatcher : IOutboxDispatcher
         }
         catch (MessageBrokerUnavailableException ex)
         {
-            await HandleExceptionWithLog(ex, "Message broker is unavailable",
+            await LogErrorAndHandle(ex, "Message broker is unavailable",
                 () => HandleBrokerUnavailableException(mappedMissingEvent));
         }
         catch (MessageBrokerDeliveryFailedException ex)
         {
-            await HandleExceptionWithLog(ex, "Message broker delivery failed",
-                () => HandleMissingEventUpdate(mappedMissingEvent, true));
+            await LogErrorAndHandle(ex, "Message broker delivery failed",
+                () => UpdateMissingEventRetryCount(mappedMissingEvent, true));
         }
         catch (Exception ex)
         {
-            await HandleExceptionWithLog(ex, "An error occurred",
-                () => HandleMissingEventUpdate(mappedMissingEvent, false));
+            await LogErrorAndHandle(ex, "An error occurred",
+                () => UpdateMissingEventRetryCount(mappedMissingEvent, false));
         }
 
         return mappedMissingEvent;
@@ -104,20 +104,28 @@ public class OutboxDispatcher : IOutboxDispatcher
         return Task.CompletedTask;
     }
 
-    private async Task HandleMissingEventUpdate(MappedMissingEvent mappedMissingEvent, bool shouldDelay)
+    private async Task UpdateMissingEventRetryCount(MappedMissingEvent mappedMissingEvent, bool shouldDelay)
     {
         if (!mappedMissingEvent.MissingEvent.IsRetryCountLessThan(_kafkaErrorsMaxRetryCount))
             return;
 
-        mappedMissingEvent.MissingEvent.RetryCount += 1;
-        mappedMissingEvent.MissingEvent.ExceptionThrown = true;
-        await _missingEventRepository.UpdateRetryCountAndExceptionThrownAsync(mappedMissingEvent.MissingEvent);
+        try
+        {
+            mappedMissingEvent.MissingEvent.RetryCount += 1;
+            mappedMissingEvent.MissingEvent.ExceptionThrown = true;
+            await _missingEventRepository.UpdateRetryCountAndExceptionThrownAsync(mappedMissingEvent.MissingEvent);
 
-        if (shouldDelay)
-            await Task.Delay(_redeliveryDelayAfterError);
+            if (shouldDelay)
+                await Task.Delay(_redeliveryDelayAfterError);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update missing event retry count in database");
+            throw new DatabaseOperationException("Failed to update missing event retry count", ex);
+        }
     }
 
-    private async Task HandleExceptionSafe(Func<Task> handler)
+    private async Task LogAndRethrowException(Func<Task> handler)
     {
         try
         {
@@ -126,12 +134,13 @@ public class OutboxDispatcher : IOutboxDispatcher
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while handling exception: {Exception}", ex.Message);
+            throw;
         }
     }
 
-    private async Task HandleExceptionWithLog(Exception ex, string message, Func<Task> handler)
+    private async Task LogErrorAndHandle(Exception ex, string message, Func<Task> handler)
     {
         _logger.LogError(ex, "{message}. Exception: {Exception}", message, ex.Message);
-        await HandleExceptionSafe(handler);
+        await LogAndRethrowException(handler);
     }
 }

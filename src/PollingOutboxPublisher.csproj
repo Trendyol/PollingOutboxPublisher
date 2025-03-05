@@ -40,16 +40,10 @@
 
     <ItemGroup>
         <None Remove="Certificates\truststore.jks" />
-        <EmbeddedResource Include="Certificates\truststore.jks">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
         <None Remove="Certificates\newroot.pem" />
-        <EmbeddedResource Include="Certificates\newroot.pem">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </EmbeddedResource>
     </ItemGroup>
 
 </Project>

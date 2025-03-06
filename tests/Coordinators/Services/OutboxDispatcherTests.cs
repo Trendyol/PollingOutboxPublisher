@@ -83,24 +83,23 @@ public class OutboxDispatcherTests
     }
         
     [Test]
-    public async Task DispatchAsync_WhenExceptionOccurredAndEventCannotBeConvertedToMissingEvent_ShouldLog()
+    public void DispatchAsync_WhenExceptionOccurredAndEventCannotBeConvertedToMissingEvent_ShouldThrowException()
     {
         //Arrange
         var outboxEvent = _fixture.Create<OutboxEvent>();
+        var expectedException = new Exception("Test exception");
 
-        _missingEventRepository.Setup(x => x.InsertAsync( It.IsAny<MissingEvent>()))
-            .ThrowsAsync(It.IsAny<Exception>());
+        _kafkaService.Setup(x => x.ProduceAsync(It.IsAny<string>(), It.IsAny<Message<string, string>>()))
+            .ThrowsAsync(expectedException);
+
+        _missingEventRepository.Setup(x => x.InsertAsync(It.IsAny<MissingEvent>()))
+            .ThrowsAsync(new Exception("Database error"));
 
         //Act & Assert
-        await _sut.DispatchAsync(outboxEvent);
-            
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Error occured when trying to handle generic exception.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        var exception = Assert.ThrowsAsync<Exception>(async () => 
+            await _sut.DispatchAsync(outboxEvent));
+    
+        Assert.That(exception.Message, Is.EqualTo("Database error"));
     }
         
     [Test]

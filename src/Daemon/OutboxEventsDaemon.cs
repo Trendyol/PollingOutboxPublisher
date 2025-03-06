@@ -39,7 +39,7 @@ public class OutboxEventsDaemon : BackgroundService
         _logger.LogInformation("TableNameSettings: {@TableNameSettings}", tableNameSettings.Value);
             
         var pollingQueue = new PollingOutboxQueue(pollingSource, workerSettings, missingDetector);
-        _coordinator = new OutboxCoordinator(outboxDispatcher, pollingQueue, offsetSetter, masterPodChecker);
+        _coordinator = new OutboxCoordinator(outboxDispatcher, pollingQueue, offsetSetter, masterPodChecker, circuitBreaker);
     }
         
 
@@ -59,14 +59,12 @@ public class OutboxEventsDaemon : BackgroundService
                 }
 
                 await _coordinator.StartAsync(stoppingToken);
-                _circuitBreaker.Reset();
             }
             catch (DatabaseOperationException e)
             {
                 _logger.LogWarning(e, 
                     "Database operation failed in OutboxEventsDaemon. Circuit breaker state change: Recording failure.");
                 _circuitBreaker.RecordFailure();
-                await Task.Delay(_waitTimeWhenCircuitBreakerOpenMs, stoppingToken);
             }
             catch (Exception e)
             {

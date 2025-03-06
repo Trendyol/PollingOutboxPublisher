@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PollingOutboxPublisher.Coordinators.OutboxCoordinator.Interfaces;
 using PollingOutboxPublisher.Coordinators.OutboxCoordinator.Services.Interfaces;
+using PollingOutboxPublisher.Coordinators.Services;
 using PollingOutboxPublisher.Coordinators.Services.Interfaces;
 
 namespace PollingOutboxPublisher.Coordinators.OutboxCoordinator;
@@ -13,14 +14,17 @@ public class OutboxCoordinator : IOutboxCoordinator
     private readonly IPollingQueue _pollingQueue;
     private readonly IOffsetSetter _offsetSetter;
     private readonly IMasterPodChecker _masterPodChecker;
+    private readonly ICircuitBreaker _circuitBreaker;
 
     public OutboxCoordinator(IOutboxDispatcher outboxDispatcher, IPollingQueue pollingQueue,
-        IOffsetSetter offsetSetter, IMasterPodChecker masterPodChecker)
+        IOffsetSetter offsetSetter, IMasterPodChecker masterPodChecker,
+        ICircuitBreaker circuitBreaker)
     {
         _outboxDispatcher = outboxDispatcher;
         _pollingQueue = pollingQueue;
         _offsetSetter = offsetSetter;
         _masterPodChecker = masterPodChecker;
+        _circuitBreaker = circuitBreaker;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -34,6 +38,8 @@ public class OutboxCoordinator : IOutboxCoordinator
             await Task.WhenAll(taskToAwait);
 
             await _offsetSetter.SetLatestOffset(outboxEvents);
+            
+            _circuitBreaker.Reset();
         }
     }
 }

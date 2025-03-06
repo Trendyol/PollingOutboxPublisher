@@ -35,7 +35,7 @@ public class MissingEventsDaemon : BackgroundService
         _waitTimeWhenCircuitBreakerOpenMs = outboxSettings.Value.RedeliveryDelayAfterError;
         var pollingMissingEventsQueue = new PollingMissingEventsQueue(pollingMissingEventsSource, outboxSettings);
         _coordinator =
-            new MissingEventsCoordinator(outboxDispatcher, pollingMissingEventsQueue, missingEventCleaner, masterPodChecker);
+            new MissingEventsCoordinator(outboxDispatcher, pollingMissingEventsQueue, missingEventCleaner, masterPodChecker, circuitBreaker);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,14 +54,12 @@ public class MissingEventsDaemon : BackgroundService
                 }
 
                 await _coordinator.StartAsync(stoppingToken);
-                _circuitBreaker.Reset();
             }
             catch (DatabaseOperationException e)
             {
                 _logger.LogWarning(e, 
                     "Database operation failed in MissingEventsDaemon. Circuit breaker state change: Recording failure.");
                 _circuitBreaker.RecordFailure();
-                await Task.Delay(_waitTimeWhenCircuitBreakerOpenMs, stoppingToken);
             }
             catch (Exception e)
             {

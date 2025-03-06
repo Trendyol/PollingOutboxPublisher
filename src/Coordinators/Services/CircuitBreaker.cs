@@ -1,20 +1,23 @@
 using System;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PollingOutboxPublisher.ConfigOptions;
 
 namespace PollingOutboxPublisher.Coordinators.Services;
 
-public class CircuitBreaker(IOptions<CircuitBreakerSettings> settings) : ICircuitBreaker
+public class CircuitBreaker(IOptions<CircuitBreakerSettings> settings, ILogger<CircuitBreaker> logger)
+    : ICircuitBreaker
 {
     private readonly int _threshold = settings.Value.Threshold;
-    private readonly int _durationMs = settings.Value.DurationMs;
+    private readonly int _durationSc = settings.Value.DurationSc;
     private readonly int _halfOpenMaxAttempts = settings.Value.HalfOpenMaxAttempts;
     private readonly bool _isEnabled = settings.Value.IsEnabled;
 
     private int _failureCount;
     private DateTime? _lastFailureTime;
     private int _halfOpenAttempts;
-    private bool _isInOpenState;
+    private bool _wasOpen;
+    private bool _currentOpen;
 
     private bool HasMetFailureThreshold => _failureCount >= _threshold;
 
@@ -24,7 +27,7 @@ public class CircuitBreaker(IOptions<CircuitBreakerSettings> settings) : ICircui
         {
             if (!_lastFailureTime.HasValue) return false;
             var timeSinceLastFailure = DateTime.UtcNow - _lastFailureTime.Value;
-            return timeSinceLastFailure.TotalMilliseconds >= _durationMs;
+            return timeSinceLastFailure.TotalMilliseconds >= _durationSc*1000;
         }
     }
 
@@ -34,22 +37,43 @@ public class CircuitBreaker(IOptions<CircuitBreakerSettings> settings) : ICircui
     {
         get
         {
-            if (!_isEnabled || !HasMetFailureThreshold)
+            if (!_isEnabled)
             {
-                _isInOpenState = false;
+                _currentOpen = false;
+                LogStateChangeIfNeeded();
                 return false;
             }
-
-            if (HasWaitDurationPassed && CanAttemptHalfOpen)
+    
+            if (!HasMetFailureThreshold)
             {
-                _halfOpenAttempts++;
-                _isInOpenState = false;
+                _currentOpen = false;
+                LogStateChangeIfNeeded();
                 return false;
             }
-
-            _isInOpenState = true;
-            return true;
+    
+            if (!HasWaitDurationPassed || !CanAttemptHalfOpen)
+            {
+                _currentOpen = true;
+                LogStateChangeIfNeeded();
+                return true;
+            }
+    
+            _halfOpenAttempts++;
+            logger.LogInformation("Circuit breaker entering half-open state. Attempt {Attempt} of {MaxAttempts}",
+                _halfOpenAttempts, _halfOpenMaxAttempts);
+            _currentOpen = false;
+            LogStateChangeIfNeeded();
+            return false;
         }
+    }
+
+    private void LogStateChangeIfNeeded()
+    {
+        if (_wasOpen == _currentOpen) return;
+
+        _wasOpen = _currentOpen;
+        logger.LogInformation("Circuit breaker state changed to: {State}.",
+            _currentOpen ? "Open" : "Closed");
     }
 
     public void RecordFailure()
@@ -58,15 +82,24 @@ public class CircuitBreaker(IOptions<CircuitBreakerSettings> settings) : ICircui
 
         _failureCount++;
         _lastFailureTime = DateTime.UtcNow;
+        _halfOpenAttempts = 0;
+
+        logger.LogWarning("Circuit breaker consecutive failure recorded. Count: {FailureCount}/{Threshold}",
+            _failureCount, _threshold);
     }
 
     public void Reset()
     {
-        if (!_isEnabled || !_isInOpenState) return;
+        if (!_isEnabled) return;
 
+        var hadFailures = _failureCount > 0;
         _failureCount = 0;
         _lastFailureTime = null;
         _halfOpenAttempts = 0;
-        _isInOpenState = false;
+
+        if (hadFailures)
+        {
+            logger.LogInformation("Circuit breaker reset. Consecutive failure count cleared.");
+        }
     }
 }

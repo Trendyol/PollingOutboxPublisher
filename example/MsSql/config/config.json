@@ -61,7 +61,7 @@
   "CircuitBreakerSettings": {
     "IsEnabled": true,
     "Threshold": 3,
-    "DurationMs": 30000,
+    "DurationSc": 60,
     "HalfOpenMaxAttempts": 1
   }
 }

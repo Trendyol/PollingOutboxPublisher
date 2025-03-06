@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator.Interfaces;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator.Services.Interfaces;
+using PollingOutboxPublisher.Coordinators.Services;
 using PollingOutboxPublisher.Coordinators.Services.Interfaces;
 using PollingOutboxPublisher.Models;
 
@@ -15,14 +16,16 @@ public class MissingEventsCoordinator : IMissingEventsCoordinator
     private readonly IPollingMissingQueue _pollingMissingQueue;
     private readonly IMissingEventCleaner _missingEventCleaner;
     private readonly IMasterPodChecker _masterPodChecker;
+    private readonly ICircuitBreaker _circuitBreaker;
 
     public MissingEventsCoordinator(IOutboxDispatcher outboxDispatcher, IPollingMissingQueue pollingMissingQueue,
-        IMissingEventCleaner missingEventCleaner, IMasterPodChecker masterPodChecker)
+        IMissingEventCleaner missingEventCleaner, IMasterPodChecker masterPodChecker, ICircuitBreaker circuitBreaker)
     {
         _outboxDispatcher = outboxDispatcher;
         _pollingMissingQueue = pollingMissingQueue;
         _missingEventCleaner = missingEventCleaner;
         _masterPodChecker = masterPodChecker;
+        _circuitBreaker = circuitBreaker;
     }
 
     /**
@@ -75,6 +78,9 @@ public class MissingEventsCoordinator : IMissingEventsCoordinator
             {
                 await _missingEventCleaner.CleanMissingEventsNotHaveOutboxEventAsync(missingEvents);
             }
+
+            // Reset circuit breaker after successful processing
+            _circuitBreaker.Reset();
         }
     }
 

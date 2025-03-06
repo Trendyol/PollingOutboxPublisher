@@ -7,6 +7,7 @@ using Moq;
 using NUnit.Framework;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator.Services.Interfaces;
+using PollingOutboxPublisher.Coordinators.Services;
 using PollingOutboxPublisher.Coordinators.Services.Interfaces;
 using PollingOutboxPublisher.Models;
 
@@ -19,6 +20,7 @@ public class MissingEventsCoordinatorTests
     private Mock<IPollingMissingQueue> _pollingMissingQueueMock;
     private Mock<IMissingEventCleaner> _missingEventCleanerMock;
     private Mock<IMasterPodChecker> _masterPodCheckerMock;
+    private Mock<ICircuitBreaker> _circuitBreakerMock;
     private IFixture _fixture;
 
     [SetUp]
@@ -28,13 +30,15 @@ public class MissingEventsCoordinatorTests
         _pollingMissingQueueMock = new Mock<IPollingMissingQueue>();
         _missingEventCleanerMock = new Mock<IMissingEventCleaner>();
         _masterPodCheckerMock = new Mock<IMasterPodChecker>();
+        _circuitBreakerMock = new Mock<ICircuitBreaker>();
         _fixture = new Fixture();
             
         _sut = new MissingEventsCoordinator(
             _outboxDispatcherMock.Object,
             _pollingMissingQueueMock.Object,
             _missingEventCleanerMock.Object,
-            _masterPodCheckerMock.Object
+            _masterPodCheckerMock.Object,
+            _circuitBreakerMock.Object
         );
     }
         
@@ -49,6 +53,7 @@ public class MissingEventsCoordinatorTests
 
         // Assert
         _masterPodCheckerMock.Verify(x => x.IsMasterPodAsync(cancellationToken), Times.Never);
+        _circuitBreakerMock.Verify(x => x.Reset(), Times.Never);
     }
         
     [Test]
@@ -62,10 +67,11 @@ public class MissingEventsCoordinatorTests
 
         // Assert
         _pollingMissingQueueMock.Verify(x => x.DequeueAsync(cancellationToken), Times.Never);
+        _circuitBreakerMock.Verify(x => x.Reset(), Times.Never);
     }
 
     [Test]
-    public async Task StartAsync_WhenMappedMissingEventsIsNotNull_ShouldDispatchAndCleanMissingEvents()
+    public async Task StartAsync_WhenMappedMissingEventsIsNotNull_ShouldDispatchAndCleanMissingEventsAndResetCircuitBreaker()
     {
         // Arrange
         var cancellationToken = new CancellationToken();
@@ -87,10 +93,11 @@ public class MissingEventsCoordinatorTests
         _missingEventCleanerMock.Verify(x => x.HandleNonMatchedMissingEventsAsync(It.IsAny<OutboxEvent[]>(), It.IsAny<MissingEvent[]>()), Times.Once);
         _missingEventCleanerMock.Verify(x => x.CleanMissingEventsHaveOutboxEventAsync(It.IsAny<MissingEvent[]>(),
             It.IsAny<List<MappedMissingEvent>>()), Times.Once);
+        _circuitBreakerMock.Verify(x => x.Reset(), Times.Once);
     }
 
     [Test]
-    public async Task StartAsync_WhenMissingEventsIsNotNull_ShouldCallCleanMissingEventsNotHaveOutboxEventAsync()
+    public async Task StartAsync_WhenMissingEventsIsNotNull_ShouldCallCleanMissingEventsNotHaveOutboxEventAsyncAndResetCircuitBreaker()
     {
         // Arrange
         var cancellationToken = new CancellationToken();
@@ -110,5 +117,6 @@ public class MissingEventsCoordinatorTests
 
         // Assert
         _missingEventCleanerMock.Verify(x => x.CleanMissingEventsNotHaveOutboxEventAsync(missingEvents), Times.Once);
+        _circuitBreakerMock.Verify(x => x.Reset(), Times.Once);
     }
 }

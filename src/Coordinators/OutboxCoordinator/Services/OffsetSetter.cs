@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using NewRelic.Api.Agent;
 using PollingOutboxPublisher.Coordinators.OutboxCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
 using PollingOutboxPublisher.Models;
+using PollingOutboxPublisher.Exceptions;
 
 namespace PollingOutboxPublisher.Coordinators.OutboxCoordinator.Services;
 
@@ -24,8 +26,16 @@ public class OffsetSetter : IOffsetSetter
     [Trace]
     public async Task SetLatestOffset(OutboxEvent[] items)
     {
-        var latestOffSet = items.Max(row => row.Id); // or newestEventId
-        await _outboxOffsetRepository.UpdateOffsetAsync(latestOffSet);
-        _logger.LogInformation("LatestOffSet: {LatestOffSet}", latestOffSet);
+        try
+        {
+            var latestOffSet = items.Max(row => row.Id);
+            await _outboxOffsetRepository.UpdateOffsetAsync(latestOffSet);
+            _logger.LogInformation("LatestOffSet: {LatestOffSet}", latestOffSet);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update offset in database");
+            throw new DatabaseOperationException("Failed to update offset", ex);
+        }
     }
 }

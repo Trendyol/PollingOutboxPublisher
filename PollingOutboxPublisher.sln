@@ -7,7 +7,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{BCF067D7-9518-4177-AD14-C854D96ED0F0}"
 ProjectSection(SolutionItems) = preProject
 	Dockerfile = Dockerfile
-	.gitlab-ci.yml = .gitlab-ci.yml
 EndProjectSection
 EndProject
 Global

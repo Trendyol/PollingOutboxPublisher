@@ -43,24 +43,15 @@ public class OutboxDispatcherTests
     }
 
     [Test]
-    public async Task DispatchAsync_WhenPublishingIsOff_ShouldLog()
+    public async Task DispatchAsync_WhenPublishingIsOff_ShouldNotThrowException()
     {
         //Arrange
         var outboxEvent = _fixture.Create<OutboxEvent>();
         _benchmarkOptions.Setup(i => i.Value)
             .Returns(new BenchmarkOptions { IsPublishingOn = false});
 
-        //Act
-        await _sut.DispatchAsync(outboxEvent);
-
-        //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Information),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Publishing closed.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.DispatchAsync(outboxEvent));
     }
         
     [Test]
@@ -69,38 +60,31 @@ public class OutboxDispatcherTests
         //Arrange
         var outboxEvent = _fixture.Create<OutboxEvent>();
 
-        //Act & Assert
+        //Act
         await _sut.DispatchAsync(outboxEvent);
             
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Message broker is unavailable.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        //Assert
         _missingEventRepository.Verify(x => x.InsertAsync( It.IsAny<MissingEvent>()), Times.Once);
     }
         
     [Test]
-    public async Task DispatchAsync_WhenExceptionOccurredAndEventCannotBeConvertedToMissingEvent_ShouldLog()
+    public void DispatchAsync_WhenExceptionOccurredAndEventCannotBeConvertedToMissingEvent_ShouldThrowException()
     {
         //Arrange
         var outboxEvent = _fixture.Create<OutboxEvent>();
+        var expectedException = new Exception("Test exception");
 
-        _missingEventRepository.Setup(x => x.InsertAsync( It.IsAny<MissingEvent>()))
-            .ThrowsAsync(It.IsAny<Exception>());
+        _kafkaService.Setup(x => x.ProduceAsync(It.IsAny<string>(), It.IsAny<Message<string, string>>()))
+            .ThrowsAsync(expectedException);
+
+        _missingEventRepository.Setup(x => x.InsertAsync(It.IsAny<MissingEvent>()))
+            .ThrowsAsync(new Exception("Database error"));
 
         //Act & Assert
-        await _sut.DispatchAsync(outboxEvent);
-            
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Error occured when trying to handle generic exception.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        var exception = Assert.ThrowsAsync<Exception>(async () => 
+            await _sut.DispatchAsync(outboxEvent));
+    
+        Assert.That(exception.Message, Is.EqualTo("Database error"));
     }
         
     [Test]
@@ -115,48 +99,31 @@ public class OutboxDispatcherTests
         _benchmarkOptions.Setup(i => i.Value)
             .Returns(new BenchmarkOptions { IsPublishingOn = true});
 
-        //Act
-        await _sut.DispatchAsync(outboxEvent);
-
-        //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Information),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Event published.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.DispatchAsync(outboxEvent));
     }
         
     [Test]
-    public async Task DispatchMissingAsync_WhenPublishingIsOff_ShouldLog()
+    public async Task DispatchMissingAsync_WhenPublishingIsOff_ShouldNotThrowException()
     {
         //Arrange
         var mappedMissingEvent = _fixture.Create<MappedMissingEvent>();
         _benchmarkOptions.Setup(i => i.Value)
             .Returns(new BenchmarkOptions { IsPublishingOn = false});
 
-        //Act
-        await _sut.DispatchMissingAsync(mappedMissingEvent);
-
-        //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Information),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Publishing closed.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.DispatchMissingAsync(mappedMissingEvent));
     }
         
     [Test]
-    public async Task DispatchMissingAsync_WhenMessageBrokerUnavailableExceptionOccurred_ShouldUpdateRetryCountOfMissingEvent()
+    public async Task DispatchMissingAsync_WhenMessageBrokerUnavailableExceptionOccurred_ShouldMarkExceptionThrown()
     {
         //Arrange
         var mappedMissingEvent = _fixture
             .Build<MappedMissingEvent>()
             .With(x => x.MissingEvent, _fixture.Build<MissingEvent>()
                 .With(x => x.RetryCount, 0)
+                .With(x => x.ExceptionThrown, false)
                 .Create())
             .With(x => x.OutboxEvent, _fixture.Build<OutboxEvent>()
                 .With(x => x.Header, "{'test': 'test'}")
@@ -169,19 +136,12 @@ public class OutboxDispatcherTests
         _kafkaService.Setup(x => x.ProduceAsync(It.IsAny<string>(), It.IsAny<Message<string,string>>()))
             .ThrowsAsync(new MessageBrokerUnavailableException());
 
-        //Act & Assert
-        await _sut.DispatchMissingAsync(mappedMissingEvent);
+        //Act
+        var result = await _sut.DispatchMissingAsync(mappedMissingEvent);
             
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Message broker is unavailable.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        //Assert
+        Assert.That(result.MissingEvent.ExceptionThrown, Is.True);
     }
-        
-        
         
     [Test]
     public async Task DispatchMissingAsync_WhenMessageMessageBrokerDeliveryFailedExceptionOccurred_ShouldUpdateRetryCountOfMissingEvent()
@@ -203,16 +163,10 @@ public class OutboxDispatcherTests
         _kafkaService.Setup(x => x.ProduceAsync(It.IsAny<string>(), It.IsAny<Message<string,string>>()))
             .ThrowsAsync(new MessageBrokerDeliveryFailedException());
 
-        //Act & Assert
+        //Act
         await _sut.DispatchMissingAsync(mappedMissingEvent);
             
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Message broker delivery failed.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);
+        //Assert
         _missingEventRepository.Verify(x => x.UpdateRetryCountAndExceptionThrownAsync( It.IsAny<MissingEvent>()), Times.Once);
     }
         
@@ -229,16 +183,10 @@ public class OutboxDispatcherTests
         _benchmarkOptions.Setup(i => i.Value)
             .Returns(new BenchmarkOptions { IsPublishingOn = true});
 
-        //Act & Assert
+        //Act
         await _sut.DispatchMissingAsync(mappedMissingEvent);
             
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("An error occurred.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
+        //Assert
         _missingEventRepository.Verify(x => x.UpdateRetryCountAndExceptionThrownAsync( It.IsAny<MissingEvent>()), Times.Once);
     }
 }

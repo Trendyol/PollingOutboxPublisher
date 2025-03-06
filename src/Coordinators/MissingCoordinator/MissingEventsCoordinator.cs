@@ -29,26 +29,33 @@ public class MissingEventsCoordinator : IMissingEventsCoordinator
     }
 
     /**
-     * Because of our outbox algorithm and MsSql async transactions, there may be some times when we process last message which
-     * row id: 500, product-api still may working on the transaction it occurred for id: 450 and not commit it yet. In our EventWorker
-     * when we mark "500" as last id we processed, we are missing 450 which are committed after we processed 500. For this reason we are dedecting
-     * these missing ids while processing them in EventWorker and later recover them here. Since event orders are not important for our domain,
-     * we don't block bulk of messages because there is still missing an event.
-     * Here is the algorithm;
-     * 1. EventWorker detects gap in its batch process, e.g: for events (1,2,5,6) missing events are (3,4)
-     * 2. Missing events are written to MissingOutboxEvents table with the date it is missed
-     * 3. MissingEventsWorker reads missing events from MissingOutboxEvents table with configured batchSize
-     * 4. Filter out events which retry time is exceed. Max retry duration is configurable from application.properties
-     * 5. For each retry time exceed event:
-     *  5.1. Delete events from MissingOutboxEvents table
-     *  5.2. Publish event to earth.product.pim.product-event-publisher.missing-events.0 topic for logging purpose
-     * 6. For each retryable events which retry time is not exceed:
-     *  6.1. Publish event to corresponding outbox topic
-     *  6.2. Delete events from MissingOutboxEvents table
+     * Due to the nature of asynchronous transactions in the outbox pattern, gaps in event sequences can occur.
+     * For example: When processing event ID 500, event ID 450 might still be in an uncommitted transaction.
+     * If we mark ID 500 as processed, we could miss ID 450 when it commits later.
+     *
+     * Since event ordering is not critical for our domain, we handle these gaps asynchronously:
+     *
+     * 1. EventWorker detects sequence gaps during batch processing
+     *    Example: For events [1,2,5,6], missing events are [3,4]
+     *
+     * 2. Missing events are recorded in MissingOutboxEvents table with timestamp
+     *
+     * 3. MissingEventsWorker polls MissingOutboxEvents table using configured batch size
+     *
+     * 4. Events exceeding retry duration (configured in application.properties) are filtered
+     *
+     * 5. For expired events:
+     *    - Remove from MissingOutboxEvents table
+     *    - Log to 'missing-events' topic for auditing
+     *
+     * 6. For the valid event that has a matching outbox event:
+     *    - Publish to original outbox topic
+     *    - Remove from MissingOutboxEvents table
      */
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        while (!cancellationToken.IsCancellationRequested && await _masterPodChecker.IsMasterPodAsync(cancellationToken))
+        while (!cancellationToken.IsCancellationRequested &&
+               await _masterPodChecker.IsMasterPodAsync(cancellationToken))
         {
             var (retryableMissingEvents, missingEvents, mappedMissingEvents, outboxEvents) =
                 await _pollingMissingQueue.DequeueAsync(cancellationToken);
@@ -65,7 +72,7 @@ public class MissingEventsCoordinator : IMissingEventsCoordinator
                 await _missingEventCleaner.CleanMissingEventsHaveOutboxEventAsync(missingEvents,
                     resultOfMappedMissingEvents.ToList());
             }
-                
+
             // move missing events that don't have match
             if (missingEvents is not null && outboxEvents is not null)
             {

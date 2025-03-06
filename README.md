@@ -111,7 +111,7 @@ value).
 The application uses circuit breakers to handle database operation failures gracefully. Each daemon (OutboxEventsDaemon and MissingEventsDaemon) has its own circuit breaker that:
 
 1. Opens after `Threshold` consecutive database failures (default: 3)
-2. Stays open for `DurationMs` (default: 30 seconds)
+2. Stays open for `DurationSc` (default: 600 seconds)
 3. Allows `HalfOpenMaxAttempts` (default: 1) operations when half-open
 4. Automatically closes if operations succeed in half-open state
 

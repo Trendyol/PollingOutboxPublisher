@@ -41,10 +41,10 @@
   },
   "DataStoreSettings": {
     "DatabaseType": "MSSQL",
-    "OutboxEvents": "outbox.outbox_events",
-    "MissingEvents": "outbox.missing_outbox_events",
-    "ExceededEvents": "outbox.exceeded_outbox_events",
-    "OutboxOffset": "outbox.outbox_offsets"
+    "OutboxEvents": "Outbox.OutboxEvents",
+    "MissingEvents": "Outbox.MissingOutboxEvents",
+    "ExceededEvents": "Outbox.ExceededOutboxEvents",
+    "OutboxOffset": "Outbox.OutboxOffsets"
   },
   "MasterPodSettings": {
     "IsActive": true,

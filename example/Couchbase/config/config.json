@@ -63,5 +63,11 @@
     "Endpoints": "",
     "DefaultDatabase": 1,
     "Config": ""
+  },
+  "CircuitBreakerSettings": {
+    "IsEnabled": true,
+    "Threshold": 3,
+    "DurationSc": 60,
+    "HalfOpenMaxAttempts": 1
   }
 }

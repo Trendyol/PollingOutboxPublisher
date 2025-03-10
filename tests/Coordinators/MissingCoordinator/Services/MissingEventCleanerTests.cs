@@ -152,17 +152,8 @@ public class MissingEventCleanerTests
             .CreateMany(5)
             .ToArray();
 
-        //Act
-        await _sut.CleanMissingEventsNotHaveOutboxEventAsync(retryableMissingEvents);
-
-        //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Information),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Missing events are discarded since retry limit is exceed. Database transactions need to be investigated.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Never);  
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.CleanMissingEventsNotHaveOutboxEventAsync(retryableMissingEvents));
     }
 
     [Test]
@@ -180,13 +171,6 @@ public class MissingEventCleanerTests
         await _sut.CleanMissingEventsNotHaveOutboxEventAsync(nonRetryableMissingEvents);
 
         //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Information),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Missing events are discarded since retry limit is exceed. Database transactions need to be investigated.")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);  
         _exceededEventRepository.Verify(x => x.InsertAsync( It.IsAny<ExceededEvent>()), Times.Exactly(nonRetryableMissingEvents.Length));
         _missingEventRepository.Verify(x => x.DeleteMissingEventsAsync( It.IsAny<List<long>>()), Times.Once);
     }

@@ -108,6 +108,15 @@ value).
 > If there will be multiple instances, the `MasterPodSettings.IsActive` should be set to `true`. Otherwise, messages can
 > be duplicated or not published.
 
+### Circuit Breaker
+
+The application uses circuit breakers to handle database operation failures gracefully. Each daemon (OutboxEventsDaemon and MissingEventsDaemon) has its own circuit breaker that:
+
+1. Opens after `Threshold` consecutive database failures (default: 3)
+2. Stays open for `DurationSc` (default: 600 seconds)
+3. Allows `HalfOpenMaxAttempts` (default: 1) operations when half-open
+4. Automatically closes if operations succeed in half-open state
+
 ## Configuration
 
 The application can be configured using the `config.json` and `secret.json` files. Here are the configurations you can
@@ -121,7 +130,7 @@ set:
 
 | **Key**                                      | **Type** | **Description**                                                                                                                                                    |
 |----------------------------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Kafka.ReloadOnChange`                         | bool     | The flag indicating whether the Kafka configuration should be reloaded when the configuration file changes.                                                        |
+| `Kafka.ReloadOnChange`                       | bool     | The flag indicating whether the Kafka configuration should be reloaded when the configuration file changes.                                                        |
 | `Kafka.SaslUsername`                         | string   | The username for the SASL authentication of the Kafka cluster.                                                                                                     |
 | `Kafka.Brokers`                              | string   | The addresses of the Kafka brokers.                                                                                                                                |
 | `Kafka.SaslPassword`                         | string   | The password for the SASL authentication of the Kafka cluster.                                                                                                     |
@@ -164,6 +173,10 @@ set:
 | `Redis.Config`                               | string   | The configuration for the Redis instance.                                                                                                                          |
 | `Redis.Password`                             | string   | The password for the Redis instance.                                                                                                                               |
 | `Serilog`                                    | object   | The configuration for Serilog.                                                                                                                                     |
+| `CircuitBreakerSettings.IsEnabled`           | bool     | Enable/disable the circuit breaker feature. When enabled, protects against database operation failures.                                                            |
+| `CircuitBreakerSettings.Threshold`           | int      | Number of consecutive database operation failures before the circuit breaker opens.                                                                                |
+| `CircuitBreakerSettings.DurationSc`          | int      | Duration in seconds to keep the circuit breaker open before attempting to half-open.                                                                               |
+| `CircuitBreakerSettings.HalfOpenMaxAttempts` | int      | Maximum number of attempts allowed when the circuit breaker is in half-open state.                                                                                 |
 
 ## EXAMPLE
 

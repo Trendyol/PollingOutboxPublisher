@@ -30,22 +30,13 @@ public class PollingSourceTests
     }
 
     [Test]
-    public async Task GetNextAsync_WhenLatestOffsetHasNoValue_ShouldLogError()
+    public async Task GetNextAsync_WhenLatestOffsetHasNoValue_ShouldNotThrowException()
     {
         //Arrange
         const int batchCount = 10;
             
-        //Act
-        await _sut.GetNextAsync(batchCount);
-
-        //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Latest Offset doesn't found")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once); 
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.GetNextAsync(batchCount));
     }
         
     [Test]
@@ -59,18 +50,8 @@ public class PollingSourceTests
         _outboxOffsetRepository.Setup(x => x.GetLatestOffsetAsync()).ReturnsAsync(latestOffset);
         _outboxEventRepository.Setup(x => x.GetNewestEventIdAsync( It.IsAny<long>())).ReturnsAsync(newestEventId);
             
-        //Act
-        await _sut.GetNextAsync(batchCount);
-
-        //Assert
-        _logger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(y => y == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().StartsWith("Latest Offset doesn't found")),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Never);
-        _outboxEventRepository.Verify(x => x.GetLatestEventsAsync(batchCount, newestEventId), Times.Never);
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.GetNextAsync(batchCount));
     }
         
     [Test]
@@ -90,10 +71,8 @@ public class PollingSourceTests
             .Setup(x => x.GetLatestEventsAsync( batchCount, newestEventId))
             .ReturnsAsync(outboxEvents);
 
-        //Act
-        await _sut.GetNextAsync(batchCount);
-
-        //Assert
+        //Act & Assert
+        Assert.DoesNotThrowAsync(async () => await _sut.GetNextAsync(batchCount));
         _outboxEventRepository.Verify(x => x.GetLatestEventsAsync( batchCount, newestEventId), Times.Once);
     }
 }

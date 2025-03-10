@@ -1,3 +1,17 @@
+## v1.5.0 (March 6, 2025)
+
+### Added:
+- Circuit breaker implementation for handling consecutive database failures
+- New configuration section `CircuitBreakerSettings` with the following options:
+    - `IsEnabled`: Controls circuit breaker functionality
+    - `Threshold`: Maximum number of consecutive failures
+    - `DurationSc`: Duration in seconds for circuit open state
+    - `HalfOpenMaxAttempts`: Maximum attempts in half-open state
+
+### Changed:
+- Enhanced error handling in offset setting operations
+- Improved logging for database operation failures
+
 ## v1.4.0 (December 17, 2024)
 
 ### Added:

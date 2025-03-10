@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <IsPackable>false</IsPackable>
-        <Version>1.4.0</Version>
+        <Version>1.5.0</Version>
         <RootNamespace>PollingOutboxPublisher</RootNamespace>
     </PropertyGroup>
 
@@ -40,16 +40,10 @@
 
     <ItemGroup>
         <None Remove="Certificates\truststore.jks" />
-        <EmbeddedResource Include="Certificates\truststore.jks">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
         <None Remove="Certificates\newroot.pem" />
-        <EmbeddedResource Include="Certificates\newroot.pem">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </EmbeddedResource>
     </ItemGroup>
 
 </Project>

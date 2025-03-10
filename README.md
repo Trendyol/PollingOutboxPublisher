@@ -1,5 +1,3 @@
-
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Trendyol/PollingOutboxPublisher/badge)](https://scorecard.dev/viewer/?uri=github.com/Trendyol/PollingOutboxPublisher)
 # PollingOutboxPublisher
 
 ## Contents

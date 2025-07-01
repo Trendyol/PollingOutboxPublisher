@@ -20,7 +20,7 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
         {
             var postgresqlCredentials = GetTbpAuthenticationCredentials(configuration);
             var postgresqlUsernamePassword = GetPostgresqlUsernameAndPassword(postgresqlCredentials.clusterName);
-            _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, postgresqlCredentials.host, postgresqlCredentials.database, postgresqlCredentials.port);
+            _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, postgresqlCredentials.host, postgresqlCredentials.database, postgresqlCredentials.port, postgresqlCredentials.appName);
         }
         else
         {
@@ -30,7 +30,7 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
                 throw new MissingConfigurationException("ConnectionString");
             }
 
-            _connectionString = connectionString;    
+            _connectionString = connectionString;
         }
     }
 
@@ -59,7 +59,7 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
         return (username, password);
     }
 
-    private static (string clusterName, string host, string database, int port) GetTbpAuthenticationCredentials(IConfiguration configuration)
+    private static (string clusterName, string host, string database, int port, string appName) GetTbpAuthenticationCredentials(IConfiguration configuration)
     {
         var clusterName = configuration.GetValue<string>("TbpAuthenticationCredentials:ClusterName");
         if (string.IsNullOrWhiteSpace(clusterName))
@@ -85,12 +85,18 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
             throw new MissingConfigurationException("TbpAuthenticationCredentials:Port");
         }
         
-        return (clusterName, host, dbName, int.Parse(port!));
+        var appName = configuration.GetValue<string>("TbpAuthenticationCredentials:ApplicationName");
+        if (string.IsNullOrWhiteSpace(appName))
+        {
+            throw new MissingConfigurationException("TbpAuthenticationCredentials:ApplicationName");
+        }
+        
+        return (clusterName, host, dbName, int.Parse(port!), appName);
     }
     
-    private static string GenerateConnectionString(string userName, string password, string host, string database, int port)
+    private static string GenerateConnectionString(string userName, string password, string host, string database, int port, string appName)
     {
-        return $"User ID={userName};Password={password};Server={host};Port={port};Database={database};Pooling=true;TrustServerCertificate=true;";
+        return $"User ID={userName};Password={password};Server={host};Port={port};Database={database};Pooling=true;TrustServerCertificate=true;ApplicationName={appName};";
     }
 
     

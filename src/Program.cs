@@ -103,6 +103,8 @@ public static class Program
             hostContext.Configuration.GetSection(nameof(ConfigOptions.Redis)));
         services.Configure<CircuitBreakerSettings>(
             hostContext.Configuration.GetSection(nameof(CircuitBreakerSettings)));
+        services.Configure<DatabaseTbpAuthenticationCredentials>(
+            hostContext.Configuration.GetSection(nameof(DatabaseTbpAuthenticationCredentials)));
     }
 
     private static void RegisterSerilog(IServiceCollection services)

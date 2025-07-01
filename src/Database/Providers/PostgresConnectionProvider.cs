@@ -1,9 +1,10 @@
-using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Npgsql;
+using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Exceptions;
 
@@ -14,13 +15,14 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
 {
     private readonly string _connectionString;
 
-    public PostgresConnectionProvider(IConfiguration configuration)
+    public PostgresConnectionProvider(IConfiguration configuration, IOptions<DatabaseTbpAuthenticationCredentials> databaseTbpAuthenticationCredentials)
     {
         if (configuration.GetValue<bool>("IsTbpAuthenticationEnabled") is true)
         {
-            var postgresqlCredentials = GetTbpAuthenticationCredentials(configuration);
-            var postgresqlUsernamePassword = GetPostgresqlUsernameAndPassword(postgresqlCredentials.clusterName);
-            _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, postgresqlCredentials.host, postgresqlCredentials.database, postgresqlCredentials.port, postgresqlCredentials.appName);
+            ValidateTbpAuthenticationCredentials(databaseTbpAuthenticationCredentials.Value);
+            var dbCredentials = databaseTbpAuthenticationCredentials.Value;
+            var postgresqlUsernamePassword = GetPostgresqlUsernameAndPassword(dbCredentials.ClusterName);
+            _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, dbCredentials.Host, dbCredentials.Database, dbCredentials.Port, dbCredentials.ApplicationName);
         }
         else
         {
@@ -58,40 +60,33 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
         var password = postgresqlCredentials["password"];
         return (username, password);
     }
-
-    private static (string clusterName, string host, string database, int port, string appName) GetTbpAuthenticationCredentials(IConfiguration configuration)
+    
+    private static void ValidateTbpAuthenticationCredentials(DatabaseTbpAuthenticationCredentials credentials)
     {
-        var clusterName = configuration.GetValue<string>("TbpAuthenticationCredentials:ClusterName");
-        if (string.IsNullOrWhiteSpace(clusterName))
+        if (string.IsNullOrWhiteSpace(credentials.ClusterName))
         {
-            throw new MissingConfigurationException("TbpAuthenticationCredentials:ClusterName");
+            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:ClusterName");
         }
         
-        var host = configuration.GetValue<string>("TbpAuthenticationCredentials:Host");
-        if (string.IsNullOrWhiteSpace(host))
+        if (string.IsNullOrWhiteSpace(credentials.Host))
         {
-            throw new MissingConfigurationException("TbpAuthenticationCredentials:Host");
+            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:Host");
         }
         
-        var dbName = configuration.GetValue<string>("TbpAuthenticationCredentials:Database");
-        if (string.IsNullOrWhiteSpace(host))
+        if (string.IsNullOrWhiteSpace(credentials.Database))
         {
-            throw new MissingConfigurationException("TbpAuthenticationCredentials:Database");
+            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:Database");
         }
         
-        var port = configuration.GetValue<string>("TbpAuthenticationCredentials:Port");
-        if ((string.IsNullOrWhiteSpace(port) || int.TryParse(port, out int parsedPort)) == false)
+        if (string.IsNullOrWhiteSpace(credentials.ApplicationName))
         {
-            throw new MissingConfigurationException("TbpAuthenticationCredentials:Port");
+            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:ApplicationName");
         }
         
-        var appName = configuration.GetValue<string>("TbpAuthenticationCredentials:ApplicationName");
-        if (string.IsNullOrWhiteSpace(appName))
+        if (credentials.Port == 0)
         {
-            throw new MissingConfigurationException("TbpAuthenticationCredentials:ApplicationName");
+            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:Port");
         }
-        
-        return (clusterName, host, dbName, int.Parse(port!), appName);
     }
     
     private static string GenerateConnectionString(string userName, string password, string host, string database, int port, string appName)

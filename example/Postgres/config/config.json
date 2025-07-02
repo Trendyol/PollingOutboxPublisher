@@ -63,5 +63,14 @@
     "Threshold": 3,
     "DurationSc": 60,
     "HalfOpenMaxAttempts": 1
+  },
+  "UseDbCredentialsFile": true,
+  "DbCredentialsFileSettings": {
+    "FileName": "config/postgresql-test-cluster.json",
+    "Host": "10.85.240.242",
+    "Database": "test",
+    "ApplicationName": "PollingOutboxPublisher",
+    "Port": 5432,
+    "AdditionalParameters": "Pooling=true;TrustServerCertificate=true;"
   }
 }

@@ -1,4 +1,4 @@
-## v1.5.0 (March 6, 2025)
+## v1.6.0 (July 2, 2025)
 
 ### Added:
 - Db Credentials file feature. 

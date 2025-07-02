@@ -15,13 +15,13 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
 {
     private readonly string _connectionString;
 
-    public PostgresConnectionProvider(IConfiguration configuration, IOptions<DatabaseTbpAuthenticationCredentials> databaseTbpAuthenticationCredentials)
+    public PostgresConnectionProvider(IConfiguration configuration, IOptions<DbCredentialsFileSettings> databaseTbpAuthenticationCredentials)
     {
-        if (configuration.GetValue<bool>("IsTbpAuthenticationEnabled") is true)
+        if (configuration.GetValue<bool>("UseDbCredentialsFile") is true)
         {
             ValidateTbpAuthenticationCredentials(databaseTbpAuthenticationCredentials.Value);
             var dbCredentials = databaseTbpAuthenticationCredentials.Value;
-            var postgresqlUsernamePassword = GetPostgresqlUsernameAndPassword(dbCredentials.ClusterName);
+            var postgresqlUsernamePassword = GetPostgresqlUsernameAndPassword(dbCredentials.FileName);
             _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, dbCredentials.Host, dbCredentials.Database, dbCredentials.Port, dbCredentials.ApplicationName);
         }
         else
@@ -43,17 +43,15 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
         => new NpgsqlConnection(_connectionString);
     
     
-    private static (string userName, string password) GetPostgresqlUsernameAndPassword(string clusterName)
+    private static (string userName, string password) GetPostgresqlUsernameAndPassword(string fileName)
     {
-        var filePath = Path.Combine("config", $"postgresql-{clusterName}.json");
-
-        if (!File.Exists(filePath))
+        if (!File.Exists(fileName))
         {
-            throw new FileNotFoundException($"Postgresql credentials file not found: {filePath}");
+            throw new FileNotFoundException($"Postgresql credentials file not found: {fileName}");
         }
             
         var postgresqlCredentials= new ConfigurationBuilder()
-            .AddJsonFile(filePath)
+            .AddJsonFile(fileName)
             .Build();
         
         var username = postgresqlCredentials["username"];
@@ -61,29 +59,29 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
         return (username, password);
     }
     
-    private static void ValidateTbpAuthenticationCredentials(DatabaseTbpAuthenticationCredentials credentials)
+    private static void ValidateTbpAuthenticationCredentials(DbCredentialsFileSettings credentialses)
     {
-        if (string.IsNullOrWhiteSpace(credentials.ClusterName))
+        if (string.IsNullOrWhiteSpace(credentialses.FileName))
         {
-            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:ClusterName");
+            throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:FileName");
         }
         
-        if (string.IsNullOrWhiteSpace(credentials.Host))
+        if (string.IsNullOrWhiteSpace(credentialses.Host))
         {
             throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:Host");
         }
         
-        if (string.IsNullOrWhiteSpace(credentials.Database))
+        if (string.IsNullOrWhiteSpace(credentialses.Database))
         {
             throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:Database");
         }
         
-        if (string.IsNullOrWhiteSpace(credentials.ApplicationName))
+        if (string.IsNullOrWhiteSpace(credentialses.ApplicationName))
         {
             throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:ApplicationName");
         }
         
-        if (credentials.Port == 0)
+        if (credentialses.Port == 0)
         {
             throw new MissingConfigurationException("DatabaseTbpAuthenticationCredentials:Port");
         }

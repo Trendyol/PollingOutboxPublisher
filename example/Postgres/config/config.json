@@ -66,10 +66,10 @@
   },
   "UseDbCredentialsFile": true,
   "DbCredentialsFileSettings": {
-    "FileName": "{file-name}",
-    "Host": "{host}",
-    "Database": "{database}",
-    "ApplicationName": "{app-name}",
+    "FileName": "config/postgresql-test-cluster.json",
+    "Host": "10.85.240.242",
+    "Database": "test",
+    "ApplicationName": "PollingOutboxPublisher",
     "Port": 5432,
     "Pooling": true,
     "TrustServerCertificate": true

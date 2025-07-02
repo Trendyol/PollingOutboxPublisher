@@ -22,8 +22,7 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
             ValidateTbpAuthenticationCredentials(databaseTbpAuthenticationCredentials.Value);
             var dbCredentials = databaseTbpAuthenticationCredentials.Value;
             var postgresqlUsernamePassword = GetPostgresqlUsernameAndPassword(dbCredentials.FileName);
-            _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, dbCredentials.Host, 
-                dbCredentials.Database, dbCredentials.Port, dbCredentials.ApplicationName,dbCredentials.Pooling, dbCredentials.TrustServerCertificate);
+            _connectionString = GenerateConnectionString(postgresqlUsernamePassword.userName, postgresqlUsernamePassword.password, dbCredentials.Host, dbCredentials.Database, dbCredentials.Port, dbCredentials.ApplicationName,dbCredentials.AdditionalParameters);
         }
         else
         {
@@ -88,15 +87,12 @@ public class PostgresConnectionProvider : IPostgresConnectionProvider
         }
     }
     
-    private static string GenerateConnectionString(string userName, string password, string host, string database, int port, string appName, bool pooling, bool trustServerCertificate)
+    private static string GenerateConnectionString(string userName, string password, string host, string database, int port, string appName, string additionalParameters)
     {
         var connectionString = $"User ID={userName};Password={password};Server={host};Port={port};Database={database};ApplicationName={appName};";
         
-        if (pooling)
-            connectionString = string.Concat(connectionString, "Pooling=true;");;
-        
-        if (trustServerCertificate)
-            connectionString = string.Concat(connectionString, "TrustServerCertificate=true;");;
+        if (!string.IsNullOrEmpty(additionalParameters))
+            connectionString = string.Concat(connectionString, additionalParameters);;
 
         return connectionString;
     }

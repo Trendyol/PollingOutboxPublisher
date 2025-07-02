@@ -10,8 +10,8 @@
   - `Database`: Db name of the database
   - `ApplicationName`: App name information on database connection
   - `Port`: Port of the database
-  - `Pooling`: Pooling information on the database connection. When true, `Pooling=true` flag will be added to the connection string.
-  - `TrustServerCertificate`: TrustServerCertificate information on the database connection. When true, `TrustServerCertificate=true` flag will be added to the connection string.
+  - `AdditionalParameters`: Additional parameters to be added on Connection. Flags such as `Pooling`, `TrustServerCertificate` can be added.
+
 
 ## v1.5.0 (March 6, 2025)
 

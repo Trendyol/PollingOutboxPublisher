@@ -71,7 +71,6 @@
     "Database": "test",
     "ApplicationName": "PollingOutboxPublisher",
     "Port": 5432,
-    "Pooling": true,
-    "TrustServerCertificate": true
+    "AdditionalParameters": "Pooling=true;TrustServerCertificate=true;"
   }
 }

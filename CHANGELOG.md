@@ -1,6 +1,21 @@
 ## v1.5.0 (March 6, 2025)
 
 ### Added:
+- Db Credentials file feature. 
+- This feature allows a database connection to be created in cases where database credentials need to be read from a file. Currently only active on PostgreSQL.
+- It can be activated with the new config value `UseDbCredentialsFile`.
+- This feature requires a new config section called `DbCredentialsFileSettings` with the following options:
+  - `FileName`: File name containing database credentials (should be full path)
+  - `Host`: Host information of the database
+  - `Database`: Db name of the database
+  - `ApplicationName`: App name information on database connection
+  - `Port`: Port of the database
+  - `Pooling`: Pooling information on the database connection. When true, `Pooling=true` flag will be added to the connection string.
+  - `TrustServerCertificate`: TrustServerCertificate information on the database connection. When true, `TrustServerCertificate=true` flag will be added to the connection string.
+
+## v1.5.0 (March 6, 2025)
+
+### Added:
 - Circuit breaker implementation for handling consecutive database failures
 - New configuration section `CircuitBreakerSettings` with the following options:
     - `IsEnabled`: Controls circuit breaker functionality

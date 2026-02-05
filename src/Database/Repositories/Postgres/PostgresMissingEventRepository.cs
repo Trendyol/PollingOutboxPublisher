@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
@@ -29,8 +28,7 @@ namespace PollingOutboxPublisher.Database.Repositories.Postgres
                          throw new MissingConfigurationException(nameof(tableNameSettings.Value.MissingEvents));
         }
 
-        [Trace]
-        public async Task InsertAsync(MissingEvent missingEvent)
+    public async Task InsertAsync(MissingEvent missingEvent)
         {
             using var connection = _postgresConnectionProvider.CreateConnection();
             await connection.ExecuteAsync(InsertStatement(), missingEvent);

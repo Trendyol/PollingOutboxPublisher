@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.Coordinators.Services.Interfaces;
 
 namespace PollingOutboxPublisher.Coordinators.Services;
@@ -16,7 +15,6 @@ public class KafkaService : IKafkaService
             _kafkaProducer = kafkaProducer;
         }
 
-    [Trace]
     public Task<DeliveryResult<string, string>> ProduceAsync(string topic, Message<string, string> message)
     {
             return _kafkaProducer.ProduceAsync(topic, message);

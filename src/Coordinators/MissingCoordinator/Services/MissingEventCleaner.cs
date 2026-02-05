@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
@@ -31,7 +30,6 @@ public class MissingEventCleaner : IMissingEventCleaner
         _brokerErrorsMaxRetryCount = workerSettings.Value.BrokerErrorsMaxRetryCount;
     }
 
-    [Trace]
     public async Task CleanMissingEventsHaveOutboxEventAsync(MissingEvent[] missingEvents,
         List<MappedMissingEvent> results)
     {
@@ -46,13 +44,11 @@ public class MissingEventCleaner : IMissingEventCleaner
         await PushToExceeded(missingEvents, _brokerErrorsMaxRetryCount);
     }
 
-    [Trace]
     public async Task CleanMissingEventsNotHaveOutboxEventAsync(MissingEvent[] missingEvents)
     {
         await PushToExceeded(missingEvents, _missingEventsMaxRetryCount);
     }
 
-    [Trace]
     public async Task HandleNonMatchedMissingEventsAsync(OutboxEvent[] outboxEvents,
         MissingEvent[] retryableMissingEvents)
     {

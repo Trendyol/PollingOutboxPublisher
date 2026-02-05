@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Confluent.Kafka;
-using NewRelic.Api.Agent;
 using Newtonsoft.Json;
 using PollingOutboxPublisher.Models;
 
@@ -12,7 +11,6 @@ namespace PollingOutboxPublisher.Helper;
 [ExcludeFromCodeCoverage]
 public static class KafkaHelper
 {
-    [Trace]
     public static KafkaMessageModel PrepareKafkaMessageModel(this OutboxEvent message, string topicName, string key)
     {
             var kafkaMessage = new Message<string, string>
@@ -33,7 +31,6 @@ public static class KafkaHelper
             return response;
         }
         
-    [Trace]
     private static void SetHeader(Message<string, string> message, string messageHeader)
     {
             if (string.IsNullOrEmpty(messageHeader))
@@ -50,7 +47,6 @@ public static class KafkaHelper
             }
         }
 
-    [Trace]
     private static void AddHeader(this Message<string, string> message, string key, string value)
     {
             var bytes = value == null

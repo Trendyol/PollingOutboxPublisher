@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Models;
@@ -26,7 +25,6 @@ public class PollingMissingEventsQueue : IPollingMissingQueue
         _retryLimit = outboxSettings.Value.MissingEventsMaxRetryCount;
     }
 
-    [Trace]
     public Task<(MissingEvent[], MissingEvent[], List<MappedMissingEvent>, OutboxEvent[])> DequeueAsync(
         CancellationToken cancellationToken)
     {

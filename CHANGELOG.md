@@ -1,3 +1,13 @@
+## v1.7.0 (February 5, 2026)
+
+### Removed:
+- NewRelic.Agent.Api dependency removed to make the project vendor-neutral
+- All NewRelic monitoring attributes ([Transaction], [Trace]) removed from codebase
+- This change makes the project more suitable for open-source use without proprietary dependencies
+
+### Changed:
+- Users can now integrate their own preferred monitoring solution (OpenTelemetry, Application Insights, Datadog, etc.)
+
 ## v1.6.0 (July 2, 2025)
 
 ### Added:

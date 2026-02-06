@@ -268,3 +268,6 @@ __pycache__/
 
 #nCrunchTemp_
 
+# macOS system files
+.DS_Store
+

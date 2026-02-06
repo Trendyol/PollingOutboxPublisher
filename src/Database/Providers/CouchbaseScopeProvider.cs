@@ -1,9 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Couchbase;
 using Couchbase.KeyValue;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Exceptions;
 
@@ -20,7 +19,6 @@ public class CouchbaseScopeProvider : ICouchbaseScopeProvider
         _couchbase = couchbaseOptions.Value;
     }
 
-    [Trace]
     public async Task<IScope> GetScopeAsync()
     {
         if (_scope != null) return _scope;

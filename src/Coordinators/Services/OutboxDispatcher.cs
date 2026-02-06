@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Coordinators.Services.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
@@ -34,7 +33,6 @@ public class OutboxDispatcher : IOutboxDispatcher
         _redeliveryDelayAfterError = workerSettings.Value.RedeliveryDelayAfterError;
     }
 
-    [Transaction]
     public async Task DispatchAsync(OutboxEvent outboxEvent)
     {
         try
@@ -49,7 +47,6 @@ public class OutboxDispatcher : IOutboxDispatcher
         }
     }
 
-    [Transaction]
     public async Task<MappedMissingEvent> DispatchMissingAsync(MappedMissingEvent mappedMissingEvent)
     {
         try
@@ -77,7 +74,6 @@ public class OutboxDispatcher : IOutboxDispatcher
         return mappedMissingEvent;
     }
 
-    [Trace]
     private async Task PublishAsync(OutboxEvent outboxEvent)
     {
         if (!_benchmarkOptions.Value.IsPublishingOn)

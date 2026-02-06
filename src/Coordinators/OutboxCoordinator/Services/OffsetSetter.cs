@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.Coordinators.OutboxCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
 using PollingOutboxPublisher.Models;
@@ -23,7 +22,6 @@ public class OffsetSetter : IOffsetSetter
         _outboxOffsetRepository = outboxOffsetRepository;
     }
 
-    [Trace]
     public async Task SetLatestOffset(OutboxEvent[] items)
     {
         try

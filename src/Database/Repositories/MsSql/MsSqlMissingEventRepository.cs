@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
@@ -30,7 +29,6 @@ public class MsSqlMissingEventRepository : IMissingEventRepository
                      throw new MissingConfigurationException(nameof(dataStoreSettings.Value.MissingEvents));
     }
 
-    [Trace]
     public async Task InsertAsync(MissingEvent missingEvent)
     {
         using var connection = _msSqlConnectionProvider.CreateConnection();

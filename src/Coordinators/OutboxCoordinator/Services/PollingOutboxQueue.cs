@@ -1,7 +1,6 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Coordinators.OutboxCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Models;
@@ -23,7 +22,6 @@ public class PollingOutboxQueue : IPollingQueue
         _prefetchCount = workerSettings.Value.OutboxEventsBatchSize;
     }
 
-    [Trace]
     public async Task<OutboxEvent[]> DequeueAsync(CancellationToken cancellationToken)
     {
         var result = await _pollingSource.GetNextAsync(_prefetchCount);

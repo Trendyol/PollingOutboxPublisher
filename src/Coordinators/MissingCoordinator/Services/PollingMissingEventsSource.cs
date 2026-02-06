@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.Coordinators.MissingCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
 using PollingOutboxPublisher.Extensions;
@@ -25,7 +24,6 @@ public class PollingMissingEventsSource : IPollingMissingEventsSource
         _outboxEventRepository = outboxEventRepository;
     }
 
-    [Trace]
     public async Task<MissingEvent[]> GetMissingEventsAsync(int batchCount)
     {
         var missingEvents = await _missingEventRepository.GetMissingEventsAsync(batchCount);

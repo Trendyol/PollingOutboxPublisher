@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.Coordinators.OutboxCoordinator.Services.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
 using PollingOutboxPublisher.Models;
@@ -22,7 +21,6 @@ public class PollingSource : IPollingSource
         _outboxEventRepository = outboxEventRepository;
     }
 
-    [Trace]
     public async Task<OutboxEventsBatch> GetNextAsync(int batchCount)
     {
         var outboxEventsBatch = new OutboxEventsBatch();

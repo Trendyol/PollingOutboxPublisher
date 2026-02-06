@@ -6,7 +6,6 @@ using Couchbase;
 using Couchbase.KeyValue;
 using Couchbase.Query;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Database.Providers.Interfaces;
 using PollingOutboxPublisher.Database.Repositories.Interfaces;
@@ -42,7 +41,6 @@ public class CouchbaseMissingEventRepository : IMissingEventRepository
         _collection ??= await _scope.CollectionAsync(_tableName);
     }
 
-    [Trace]
     public async Task InsertAsync(MissingEvent missingEvent)
     {
         await InitializeCollectionAsync();

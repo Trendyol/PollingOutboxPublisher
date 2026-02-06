@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NewRelic.Api.Agent;
 using PollingOutboxPublisher.ConfigOptions;
 using PollingOutboxPublisher.Coordinators.Services.Interfaces;
 
@@ -61,14 +60,12 @@ public sealed class KafkaProducer : IKafkaProducer
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
 
-    [Trace]
     public async Task<DeliveryResult<string, string>> ProduceAsync(string topic, Message<string, string> message)
     {
         var deliveryResult = await _producer.ProduceAsync(topic, message);
         return deliveryResult;
     }
 
-    [Trace]
     public void Dispose()
     {
         _producer?.Flush(TimeSpan.FromSeconds(10));

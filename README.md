@@ -122,6 +122,19 @@ The application uses circuit breakers to handle database operation failures grac
 The application can be configured using the `config.json` and `secret.json` files. Here are the configurations you can
 set:
 
+## Monitoring & Observability
+
+This project does not include built-in APM or monitoring. Users can integrate their preferred observability solution:
+- **OpenTelemetry** (vendor-neutral, recommended for distributed tracing)
+- **Application Insights** (Azure)
+- **Datadog**
+- **NewRelic**
+- **Elastic APM**
+- **Prometheus** (for metrics)
+- Or any other monitoring tool of your choice
+
+The codebase is clean and ready for you to add instrumentation as needed for your monitoring platform.
+
 ## Important Notes
 
 > [!WARNING]
